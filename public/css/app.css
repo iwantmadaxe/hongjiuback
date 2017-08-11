@@ -1,0 +1,55 @@
+@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);.clearfix:before,
+.cl-fx:after {
+  content: " ";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+p {
+  margin: 0 0 0 0;
+}
+
+.normal-input {
+  width: 160px;
+  height: 36px;
+  line-height: 36px;
+  font-size: 12px;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  margin: 0;
+  background: #fdfdfd;
+  border: 1px solid #bfcbd9;
+  color: #1f2d3d;
+  padding: 3px 15px;
+  -webkit-transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.normal-input:hover {
+  border-color: #8391a5;
+}
+
+.normal-input:focus {
+  background: #fff;
+  border-color: #2baab1;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+

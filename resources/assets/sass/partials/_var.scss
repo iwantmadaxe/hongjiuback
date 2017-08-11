@@ -1,0 +1,93 @@
+/* Base Color */
+$color-blue: #4d94ff;
+$color-white: #fff;
+$color-black: #000;
+$color-text: #333;
+$color-gray: #a9abab;
+$color-gray-dx: #8691a6;
+$color-light-gray-bg: #f5f5f5;
+$color-yellow: #ef8a01;
+$color-orange: #fb4a10;
+$color-light-orange: #fb7410;
+$color-red: #c91425;
+$color-context-title: #969696;
+$color-context-active: #c91425;
+$border-color: #c8c8cd;
+$success-color: #4caf50;
+$error-color: #f44336;
+$warning-color: #ffc107;
+$coupon-text: #7d7c75;
+$mint-field: #a9a9a9;
+
+/* Cell Component */
+$cell-value-color: #888;
+
+/* Header Component */
+$header-height: 40px;
+
+/* Button Component */
+$button-default-color: #656b79;
+$button-default-background-color: #f6f8fa;
+$button-default-plain-color: #5a5a5a;
+$button-default-box-shadow: 0 0 1px #b8bbbf;
+$button-primary-color: #fff;
+$button-primary-background-color: #26a2ff;
+$button-danger-color: #fff;
+$button-danger-background-color: #ef4f4f;
+$btn-gray: #a1a1a1;
+$btn-text-gray: #5a5a5a;
+
+/* Tab Item Component */
+$tab-item-font-size: 12px;
+
+/* Tabbar Component */
+$tabbar-background-color: #fafafa;
+$tabbar-tab-item-selected-background-color: #eaeaea;
+$tabbar-tab-item-selected-color: $color-blue;
+
+/* Navbar Component */
+$navbar-background-color: #fafafa;
+$tabbar-tab-item-selected-background-color: #eaeaea;
+
+/* Checklist Component */
+$checklist-title-color: #888;
+
+/* Radio Component */
+$radio-title-color: #888;
+
+/* z-index */
+$z-index-normal: 1;
+$z-index-middle: 10;
+
+/* Search Bar Gradient Color */
+$search-bar-gradient-color: #c91523;
+
+/* Border Color */
+$border-gray: #e5e5e5;
+$button-border-gray: #dcdcdc;
+$button-border-red: #d91100;
+
+/* Background Color */
+$bg-gray: #f1f1f1;
+
+/* Special Color for Bid */
+$bid-color: #6a3906;
+$bid-background-color: #0266bb;
+$main-background-color: #fcc854;
+$limit-color: #ef7979;
+$connect-color: #0068b7;
+
+/* Font Size */
+$huge-unit: 0.2rem;
+$page-title: 0.16rem;
+$square-title: 0.14rem;
+$normal-text: 0.12rem;
+$input-text: 0.14rem;
+$big-text: 0.16rem;
+$result-text: 0.15rem;
+$price: 0.18rem;
+$package-title: 0.12rem;
+$navbar-title: 0.13rem;
+$order-title: 0.13rem;
+$text-area-size: 0.14rem;
+$coupon-topic: 0.25rem;
