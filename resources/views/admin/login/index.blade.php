@@ -143,7 +143,7 @@
                     type: 'POST',
                     success: function (res) {
                         _this.lock = 2;
-                        window.location.href = "{{ url('admin/home') }}";
+                        window.location.href = "{{ url('admin/product/list') }}";
                     },
                     error: function (err) {
                         if (err.responseJSON.status_code == 400) {
