@@ -1,112 +1,130 @@
 <?php
 
-Route::group(['middleware' => 'auth:admin'], function () {
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
 
-	Route::get('/notify', 'UserController@notify');
-
-	//用户管理
-	Route::get('/users', 'UserController@getUsers');
-	Route::put('/user/{id}/enable/{enable}', 'UserController@enable')->where('id', '[0-9]+');    //todo 参数验证
-	Route::delete('/user/{id}', 'UserController@delete')->where('id', '[0-9]+');    //todo 参数验证
-	Route::get('/user/state', 'UserController@state');
-	Route::get('/user/increment', 'UserController@increment');
-
-	//卡管理
-	Route::get('/cards', 'CardController@getCards');
-	Route::post('/cards', 'CardController@import');
-	Route::post('/cards/agent', 'CardController@importAgent');
-	Route::post('/card', 'CardController@create');
-	Route::get('/card/status/all', 'CardController@status');
-	Route::get('/card/operate/{operate}', 'CardController@operate');
-	Route::get('/card/status/update', 'CardController@updateStatus');
-	Route::get('/card/production/info', 'CardController@productionInfo');
-	Route::post('/card/net/add', 'CardController@addNet');
-	Route::post('/card/net/update', 'CardController@updateNet');
-	Route::post('/card/net/delete', 'CardController@deleteNet');
-	Route::post('/card/net/recover', 'CardController@recoverNet');
-	Route::get('/card/flow/detail', 'CardController@flowDetail');
-	Route::get('/card/flow/update', 'CardController@updateFlow');
-
-	//运营商管理
-	Route::get('/operators', 'OperatorController@index');
-	Route::get('/operator/list', 'OperatorController@getList');
-	Route::post('/operator', 'OperatorController@create');
-	Route::get('/operator/{id}', 'OperatorController@show');
-	Route::put('/operator/{id}', 'OperatorController@update');
-
-	//实名认证
-	Route::get('/certificates', 'CertificationController@index');
-	Route::get('/certificate/{id}', 'CertificationController@show');
-	Route::put('/certificate/{id}', 'CertificationController@update');
-
-	//代理商
-	Route::get('/agent/list', 'AgentController@getList');
-	Route::get('/agents', 'AgentController@index');
-	Route::post('/agent', 'AgentController@create');
-	Route::put('/agent/{id}', 'AgentController@update')->where('id', '[0-9]+');
-	Route::get('/agent/{id}', 'AgentController@show')->where('id', '[0-9]+');
-	Route::put('/agent/cancel', 'AgentController@cancel');
-	Route::post('/agent/wechat/menu', 'AgentController@wechatMenu');
-	Route::post('/agent/{id}/agent', 'AgentController@addAgent')->where('id', '[0-9]+');    //为代理商添加子代理商
-
-	//套餐
-	Route::get('/package/list', 'PackageController@getList');
-	Route::get('/packages', 'PackageController@index');
-	Route::post('/package', 'PackageController@create');
-	Route::put('/package/enable/{enable}', 'PackageController@enable');    //todo 参数验证
-	Route::delete('/package', 'PackageController@delete');    //todo 参数验证
-
-	//套餐折扣
-	Route::get('/package/discounts', 'PackageController@discountList');
-	Route::post('/package/discount', 'PackageController@createDiscount');
-	Route::get('/package/discount/{id}', 'PackageController@showDiscount');
-	Route::put('/package/discount/{id}', 'PackageController@updateDiscount');
-	Route::delete('/package/discount/{id}', 'PackageController@deleteDiscount');
-	Route::put('/package/discounts', 'PackageController@updateDiscounts');
-
-	//订单
-	Route::get('/orders', 'OrderController@index');
-	Route::get('/orders/back', 'OrderController@back');
-	Route::get('/percentage', 'OrderController@percentage');
-	Route::post('/order/package/type', 'OrderController@setPackageType');
-
-	//管理员
-	Route::get('/admins', 'AdminController@index');
-	Route::get('/admin/{id}', 'AdminController@show');
-	Route::delete('/admin', 'AdminController@delete');
-	Route::put('/admin/enable/{bool}', 'AdminController@enable');
-	Route::post('/admin', 'AdminController@create');
-	Route::post('/update/{id}', 'AdminController@update');
-
-	//代理商充值
-	Route::get('/money', 'MoneyController@index');
-	Route::put('/agent/{id}/money', 'MoneyController@add');
-	Route::get('/agent/money/record', 'MoneyController@record');
-
-	//角色
-	Route::get('/role/list', 'RoleController@getList');
-	Route::get('/roles', 'RoleController@index');
-	Route::post('/role/create', 'RoleController@store');
-	Route::get('/role/{id}/edit', 'RoleController@edit')->where('id', '[0-9]+');
-	Route::post('/role/{id}', 'RoleController@update')->where('id', '[0-9]+');
-    Route::post('/permission/role/{id}', 'RoleController@permission')->where('id', '[0-9]+');
-
-	//文件上传
-	Route::post('/file', 'FileController@upload');
-
-	//积分
-    Route::get('/points', 'PointController@index');
-    Route::get('/points/sponsor', 'PointController@sponsor');
-    Route::get('/points/receiver', 'PointController@receiver');
-    Route::get('/points/exchange/list', 'PointController@exchangeApplyList');
-    Route::post('/points/exchange/{id}', 'PointController@exchangeApply')->where('id', '[0-9]+');
-    Route::get('/points/exchange/rate', 'PointController@pointExchangeRateList');
-    Route::post('/points/exchange/rate', 'PointController@pointExchangeRate');
-    Route::get('/points/package/list', 'PointController@pointPackageList');
-
-	//权限
-    Route::get('/permission/list', 'PermissionController@index');
-    Route::get('/permission/role/{id}', 'PermissionController@permissionOfRole')->where('id', '[0-9]+');
-    Route::get('/permission/my', 'PermissionController@myPermission');
-
+//用户登录
+Route::post('auth-login','AuthController@login')->name('api_auth');
+//  页面的视图
+Route::get('/product/list', function () {
+    return view('admin.product.list');
 });
+Route::get('/product/list', function () {
+    return view('admin.product.list');
+});
+
+Route::get('/product/add', function () {
+    return view('admin.product.add');
+});
+
+Route::get('/product/edit', function () {
+    return view('admin.product.edit');
+});
+
+Route::get('/merchant/list', function () {
+    return view('admin.merchant.list');
+});
+
+Route::get('/merchant/add', function () {
+    return view('admin.merchant.add');
+});
+
+Route::get('/merchant/edit', function () {
+    return view('admin.merchant.edit');
+});
+
+Route::get('/banner/list', function () {
+    return view('admin.banner.list');
+});
+
+Route::get('/banner/add', function () {
+    return view('admin.banner.add');
+});
+
+Route::get('/banner/edit', function () {
+    return view('admin.banner.edit');
+});
+
+Route::get('/context/list', function () {
+    return view('admin.context.list');
+});
+
+Route::get('/context/add', function () {
+    return view('admin.context.add');
+});
+
+Route::get('/context/edit', function () {
+    return view('admin.context.edit');
+});
+
+Route::get('/activity/list', function () {
+    return view('admin.activity.list');
+});
+
+Route::get('/activity/add', function () {
+    return view('admin.activity.add');
+});
+
+Route::get('/activity/edit', function () {
+    return view('admin.activity.edit');
+});
+
+Route::get('/history/list', function () {
+    return view('admin.history.list');
+});
+
+Route::get('/history/add', function () {
+    return view('admin.history.add');
+});
+
+Route::get('/history/edit', function () {
+    return view('admin.history.edit');
+});
+
+Route::get('/msg/list', function () {
+    return view('admin.msg.list');
+});
+
+Route::get('/msg/add', function () {
+    return view('admin.msg.add');
+});
+
+Route::get('/msg/edit', function () {
+    return view('admin.msg.edit');
+});
+
+Route::get('/man/list', function () {
+    return view('admin.man.list');
+});
+
+Route::get('/man/add', function () {
+    return view('admin.man.add');
+});
+
+Route::get('/man/edit', function () {
+    return view('admin.man.edit');
+});
+//登录后操作
+Route::group(['middleware' => 'jwt.auth'],function(){
+    Route::get('auth-logout','LoginController@logout')->name('logout_admin');
+    Route::post('add-admin','UserController@addAdmin')->name('add_admin');
+    Route::post('update-admin','UserController@updateAdmin')->name('update_admin');
+    Route::get('admin-list/{page}','UserController@adminList')->where('page','[0-9]+')->name('admin-list');
+    Route::get('customer-list/{page}','CustomerController@customerList')->where('page','[0-9]+')->name('customer-list');
+   // Route::post('culture/add','CultureController@add');
+    Route::resource('culture','CultureController');
+    Route::resource('product','ProductController');
+    Route::resource('agency','AgencyController');
+    Route::get('culture/view/{id}','CultureController@view')->where('id','[0-9]+');
+    Route::get('area/list/{level?}/{id?}','AreaController@getList')->where(['level'=>'[0-9]+','id'=>'[0-9]+']);
+    Route::get('culture-type','CultureController@getTypeList');
+});
+

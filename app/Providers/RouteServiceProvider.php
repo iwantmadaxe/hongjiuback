@@ -5,10 +5,6 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
-/**
- * Class RouteServiceProvider
- * @package App\Providers
- */
 class RouteServiceProvider extends ServiceProvider
 {
     /**
@@ -20,12 +16,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected $namespace = 'App\Http\Controllers';
 
-	protected $namespace_admin = 'App\Http\Controllers\Admin';
 
-	/**
-	 * @var string
-	 */
-	protected $namespace_api_v1 = 'App\API\V1\Controllers';
+    protected $namespace_admin = 'App\Http\Controllers\Admin';
 
     /**
      * Define your route model bindings, pattern filters, etc.
@@ -48,11 +40,11 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->mapApiRoutes();
 
-		$this->mapFrontRoutes();
-
         $this->mapWebRoutes();
 
         $this->mapAdminRoutes();
+
+        //
     }
 
     /**
@@ -65,28 +57,9 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes()
     {
         Route::middleware('web')
-			 ->prefix('admin')
              ->namespace($this->namespace)
              ->group(base_path('routes/web.php'));
     }
-
-    protected function mapFrontRoutes()
-	{
-		Route::middleware('web')
-			->namespace($this->namespace)
-			->group(base_path('routes/front.php'));
-	}
-
-	/**
-	 *
-	 */
-	protected function mapAdminRoutes()
-	{
-		Route::prefix('api/v1/admin')
-			->middleware('web')
-			->namespace($this->namespace_admin)
-			->group(base_path('routes/admin.php'));
-	}
 
     /**
      * Define the "api" routes for the application.
@@ -97,9 +70,18 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
-        Route::prefix('api/v1')
+        Route::prefix('api')
              ->middleware('api')
-             ->namespace($this->namespace_api_v1)
+             ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+
+    protected function mapAdminRoutes()
+    {
+        Route::prefix('admin')
+            ->middleware('admin')
+            ->namespace($this->namespace_admin)
+            ->group(base_path('routes/admin.php'));
     }
 }

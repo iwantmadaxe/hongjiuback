@@ -1,54 +1,49 @@
 <?php
-/*
- * Sometime too hot the eye of heaven shines
- */
 
 namespace App\Http\Controllers\Admin;
 
-use App\API\V1\BaseController;
-use App\Http\Requests\AdminLoginRequest;
+use App\Models\Admin;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\ThrottlesLogins;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * 认证用户控制器
+ * Class AdminController
+ * @package App\Http\Controllers\Admin
+ */
 class AuthController extends BaseController
 {
-	use AuthenticatesUsers;
+    use AuthenticatesUsers;
+    protected $guard = 'admin';
 
-	public function username()
-	{
-		return 'username';
-	}
+    /**
+     * 登录
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login(Request $request)
+    {
+        $credentials = $request->only('name','password');
+        if ( $token = Auth::guard('admin')->attempt($credentials) ) {
+            return response()->json(['message'=>'登录成功','token' => $token,'name'=>$credentials['name']]);
+        } else {
+            return response()->json(['message'=>'登录失败','token'=>false]);
+        }
+    }
 
-	public function login(AdminLoginRequest $request)
-	{
-		$this->validateLogin($request);
+    /**
+     * 退出登录
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout()
+    {
+        Auth::guard('admin')->logout();
+        return response()->json(['message'=>'退出成功']);
 
-		if ($this->attemptLogin($request)) {
-			$request->session()->regenerate();
-			$this->clearLoginAttempts($request);
+    }
 
-			return $this->response()->array(['data' => ['message' => '登录成功']]);
-		}
-
-		$this->incrementLoginAttempts($request);
-
-		return $this->response()->error('用户名或密码错误', 400, 400100);
-	}
-
-	protected function guard()
-	{
-		return Auth::guard('admin');
-	}
-
-	public function logout(Request $request)
-	{
-		$this->guard()->logout();
-
-		$request->session()->flush();
-
-		$request->session()->regenerate();
-
-		return redirect('/admin');
-	}
 }

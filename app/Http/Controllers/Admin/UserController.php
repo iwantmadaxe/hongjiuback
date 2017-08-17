@@ -5,100 +5,73 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\API\V1\BaseController;
-use App\Exceptions\UserException;
-use App\Http\Requests\UserIncrementRequest;
-use App\Repositories\AdminRepository;
-use App\Repositories\UserRepository;
-use App\Transformers\AdminMessageTransformer;
-use App\Transformers\UserListTransformer;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
-class UserController extends BaseController
+use App\Http\Requests\Admin\AdminAddRequest;
+use App\Http\Requests\Admin\AdminUpdateRequest;
+use App\Models\Admin;
+use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
+
+class UserController extends AdminController
 {
-	private $userRepository;
-	private $adminRepository;
 
-	public function __construct(AdminRepository $adminRepository, UserRepository $userRepository)
-	{
-		$this->userRepository = $userRepository;
-		$this->adminRepository = $adminRepository;
-	}
+    /**
+     * @var UserService
+     */
+    public  $userService;
 
-	public function notify(AdminMessageTransformer $messageTransformer)
+	public function __construct(UserService $userService)
 	{
-		$user = Auth::guard('admin')->user();
-		$notify = $user->unreadNotifications;
-		return $this->response()->collection($notify, $messageTransformer);
-	}
-
-	public function getUsers(UserListTransformer $listTransformer, Request $request)
-	{
-	    // 判断是否是管理员
-        $admin = Auth::guard('admin')->user();
-        if ($admin->isAdmin()) {
-            $users = $this->userRepository->with('recommendation')->get($request)->paginate();
-        } else {
-            $users = $this->userRepository->with('recommendation')->setAgent($admin->id)->get($request)->paginate();
-        }
-		return $this->response()->paginator($users, $listTransformer);
+	    $this->userService = $userService;
 	}
 
     /**
-     * 禁用、解除禁用用户。
-     *
-     * @param $userId
-     * @param $enable
-     * @return mixed
+     * 创建管理员
+     * @param AdminAddRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
-	public function enable($userId, $enable)
-	{
-		$this->userRepository->checkExist($userId);
-		if ($this->userRepository->enable($userId, $enable)) {
-			return $this->response()->array(['data' => ['message' => '操作成功']]);
-		}
-	}
+	public function addAdmin(AdminAddRequest $request)
+    {
+        $credentials = $request->all();
+        $credentials['password'] = bcrypt($request->input('password'));
 
-	public function delete($userId)
-	{
-		$this->userRepository->checkExist($userId);
-		if ($this->userRepository->delete($userId)) {
-			return $this->response()->array(['data' => ['message' => '操作成功']]);
-		}
-	}
-
-	public function state()
-	{
-		//先看看缓存里面有没有啊
-		if ( !Cache::has('user_state')) {
-			//缓存一波
-			Cache::remember('user_state', 60, function () {
-				 $state = [
-					'day'   => $this->userRepository->newUserSince(Carbon::today()->toDateTimeString()),
-					'week'  => $this->userRepository->newUserSince(Carbon::now()->startOfWeek()->toDateTimeString()),
-					'month' => $this->userRepository->newUserSince(Carbon::now()->startOfMonth()->toDateTimeString()),
-				];
-				$state['count'] = $this->userRepository->all()->count();
-				return $state;
-			});
-		}
-		$state = Cache::get('user_state');
-		return $this->response()->array(['data' => $state]);
-	}
-
-	public function increment(UserIncrementRequest $request)
-	{
-	    $admin = Auth::guard('admin')->user();
-        if ($admin->isAdmin()) {
-            $increnment = $this->userRepository
-                ->increment($request['start_date'], $request['end_date']);
-        } else {
-            $increnment = $this->userRepository->setAgent($admin->id)
-                ->increment($request['start_date'], $request['end_date']);
+        $result = $this->userService->addAdmin($credentials);
+        if($result instanceof Admin){
+            return $this->success(['message'=>'创建成功']);
+        }else{
+            return $this->error(400000,400,'创建失败');
         }
-		return $this->response()->array(['data' => $increnment]);
-	}
+    }
+
+    /**
+     * 更新管理员
+     * @param AdminUpdateRequest $request
+     * @return JsonResponse
+     */
+    public function updateAdmin(AdminUpdateRequest $request)
+    {
+        $credentials = $request->all();
+        if(isset($credentials['password'])){
+            $credentials['password'] = bcrypt($request->input('password'));
+        }
+        $result = $this->userService->updateAdmin($credentials);
+        if($result){
+            return $this->success(['message'=>'更新成功']);
+        }else{
+            return $this->error(400000,400,'更新失败');
+        }
+    }
+
+    /**
+     * 获取管理员列表
+     * @param $page
+     * @return JsonResponse
+     */
+    public function adminList($page)
+    {
+        $result = $this->userService->adminList($page);
+       return  $this->responsePage($result);
+    }
+
+
 }

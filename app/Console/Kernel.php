@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        'App\Console\Commands\TestApi'
+        //
     ];
 
     /**
@@ -24,25 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('regularFlowCheck')
-             ->daily()
-             ->sendOutputTo(storage_path('res.txt'));
-
-		$schedule->command('hourFlowCheck')
-            ->hourly()
-            ->sendOutputTo(storage_path('res.txt'));
-
-		$schedule->command('minuteFlowCheck')
-            ->everyMinute()
-            ->sendOutputTo(storage_path('res_minute.txt'));
-
-		$schedule->command('minutesOrderCheck')
-            ->everyFiveMinutes()
-            ->sendOutputTo(storage_path('res_5_minute.txt'));
-
-        $schedule->command('minutesPointExchangePackageCheck')
-            ->everyFiveMinutes()
-            ->sendOutputTo(storage_path('res_5_minute.txt'));
+        // $schedule->command('inspire')
+        //          ->hourly();
     }
 
     /**

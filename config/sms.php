@@ -14,19 +14,19 @@ return [
          */
         'YunTongXun' => [
             //主帐号,对应开官网发者主账号下的 ACCOUNT SID
-            'accountSid' => env('YTX_ACCOUNT_SID', 'your account sid'),
+            'accountSid' => env('YTX_ACCOUNT_SID', '8aaf07085dbbd708015dbc23aafd0077'),
 
             //主帐号令牌,对应官网开发者主账号下的 AUTH TOKEN
-            'accountToken' => env('YTX_AUTH_TOKEN', 'your account token'),
+            'accountToken' => env('YTX_AUTH_TOKEN', 'ed0990f116ce461e834e48b14689b4a6'),
 
             //应用Id，在官网应用列表中点击应用，对应应用详情中的APP ID
             //在开发调试的时候，可以使用官网自动为您分配的测试Demo的APP ID
-            'appId' => env('SMS_APP_KEY', 'your app id'),
+            'appId' => env('SMS_APP_KEY', '8aaf07085dbbd708015dbc23ab42007b'),
 
             //请求地址
             //沙盒环境（用于应用开发调试）：sandboxapp.cloopen.com
             //生产环境（用户应用上线使用）：app.cloopen.com
-            'serverIP' => 'app.cloopen.com',
+            'serverIP' => 'sandboxapp.cloopen.com',
 
             //请求端口，生产环境和沙盒环境一致
             'serverPort' => '8883',

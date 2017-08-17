@@ -1,97 +1,80 @@
 <?php
-/*
- * Sometime too hot the eye of heaven shines
- */
 
 namespace App\Http\Controllers\Admin;
 
-use App\API\V1\BaseController;
-use App\Http\Requests\AdminCreateRequest;
-use App\Http\Requests\AdminUpdateRequest;
-use App\Models\Admin;
-use App\Models\RoleUser;
-use App\Transformers\AdminListTransformer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Psy\Util\Json;
 
+/**
+ * 后台控制器父类
+ * Class AdminController
+ * @package App\Http\Controllers\Admin
+ */
 class AdminController extends BaseController
 {
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-
-	public function index(AdminListTransformer $listTransformer)
-	{
-		$admins = Admin::paginate();
-		return $this->response()->paginator($admins, $listTransformer);
-	}
-
-	public function show($id, AdminListTransformer $listTransformer)
-	{
-		$admin = Admin::find($id);
-		return $this->response()->item($admin, $listTransformer);
-	}
-
-	public function delete(Request $request)
-	{
-		foreach ($request['ids'] as $key => $id) {
-			$admin = Admin::find($id)->delete();
-		}
-		return $this->response()->array(['data' => ['message' => '删除成功']]);
-	}
-
-	public function enable($enable, Request $request)
-	{
-		foreach ($request['ids'] as $key => $id) {
-			$admin = Admin::find($id)->update(['status' => $enable]);    //0表示禁用  1表示启用
-		}
-		return $this->response()->array(['data' => ['message' => '修改成功']]);
-	}
-
-	public function create(AdminCreateRequest $request)
-	{
-		$admin = [
-			'username' => $request['username'],
-			'password' => bcrypt($request['password']),
-			'status' => 1,
-		];
-
-		DB::beginTransaction();
-		try{
-            $adminRecord = Admin::create($admin);
-            $adminRecord->attachRole(['id' => $request['role_id']]);
-            DB::commit();
-        }catch (\Exception $e) {
-		    DB::rollBack();
-		    return $this->response()->errorBadRequest('保存失败！');
+    /**
+     * 逻辑出错返回
+     * @param $code
+     * @param $statusCode
+     * @param string $message
+     * @param array $errors
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function error($code,$statusCode,$message='',$errors=[])
+    {
+        $result = ['code'=>$code,'status_code'=>$statusCode,'message'=>$message];
+        if(!empty($errors)){
+            $result['errors'] = $errors;
         }
+        return \Response::json($result,$statusCode);
+    }
 
-		return $this->response()->array(['data' => ['message' => '创建成功']]);
-	}
-
-	public function update(AdminUpdateRequest $request, $id)
-	{
-		$admin = Admin::find($id);
-		if (!$admin) {
-            return $this->response()->errorBadRequest('该用户已被删除！');
+    /**
+     * 逻辑成功返回
+     * @param $data
+     * @param null $meta
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function success($data,$meta = null)
+    {
+        $result = ['data'=>$data];
+        if(null !== $meta){
+            $result['meta'] = $meta;
         }
+        return \Response::json($result);
+    }
 
-        DB::beginTransaction();
-		try {
-            $params = [];
-            $params['username'] = $request['username'];
-            if ($request['password']) {
-                $params['password'] = bcrypt($request['password']);
+    /**
+     * 返回分页页面处理结果
+     * @param Paginator $page
+     * $param array $jsoned
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function responsePage($page,$jsoned=[])
+    {
+        $page = $page->toArray();
+        $result = [];
+        if(!empty($jsoned) && !empty($page['data'])){
+            foreach ($page['data'] as $k => $item){
+                foreach ($jsoned as $jsoned_item){
+                    $page['data'][$k][$jsoned_item] = json_decode($item[$jsoned_item]);
+                }
             }
-            $adminRecord = $admin->update($params);
-
-            $admin->roles()->sync([$request['role_id']]);
-            DB::commit();
-        } catch (\Exception $e) {
-		    DB::rollBack();
-		    logger($e);
-            return $this->response()->errorBadRequest('保存失败！');
         }
+        $result['data'] = $page['data'];
+        unset($page['data']);
+        $meta = new \stdClass();
+        $meta->pagination = $page;
+        $result['meta'] = $meta;
+        return \Response::json($result);
 
-		return $this->response()->array(['data' => ['message' => '修改成功']]);
-	}
+    }
+
+
 }

@@ -14,14 +14,9 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web',
-        'passwords' => 'users',
+        'guard' => 'admin',
+        'passwords' => 'admins',
     ],
-
-//    'defaults' => [
-//        'guard' => 'admin',
-//        'passwords' => 'admins',
-//    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -51,13 +46,8 @@ return [
             'provider' => 'users',
         ],
 
-		'local' => [
-			'driver' => 'session',
-			'provider' => 'local_credential',
-		],
-
         'admin' => [
-            'driver' => 'session',
+            'driver' => 'jwt',
             'provider' => 'admins',
         ],
     ],
@@ -84,16 +74,11 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-
-		'local_credential' => [
-			'driver' => 'eloquent',
-			'model' => App\Models\LocalCredential::class,
-		],
-
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
-        ],
+        ]
+
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
@@ -118,6 +103,11 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+        'admins' => [
+            'provider' => 'admins',
             'table' => 'password_resets',
             'expire' => 60,
         ],

@@ -114,7 +114,7 @@
         methods: {
             login: function () {
                 var _this = this;
-                var url = "{{ url('admin/login') }}";
+                var url = "{{ url('admin/auth-login') }}";
                 this.auth.username = $.trim(this.auth.username);
                 this.error = {
                     username: {

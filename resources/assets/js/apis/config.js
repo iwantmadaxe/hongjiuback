@@ -2,7 +2,7 @@ let port = {};
 
 if (is_pro) {
 	port = {
-		route: 'http://telecom.odinsoft.com.cn/',
+		route: 'http://localhost/',
 		version: 'api/v1/'
 	};
 } else {

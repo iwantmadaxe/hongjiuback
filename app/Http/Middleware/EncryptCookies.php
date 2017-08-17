@@ -12,8 +12,6 @@ class EncryptCookies extends BaseEncrypter
      * @var array
      */
     protected $except = [
-        'openid',
-		'wechat',
-        'token'
+        //
     ];
 }

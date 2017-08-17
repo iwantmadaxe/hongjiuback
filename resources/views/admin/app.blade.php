@@ -64,7 +64,7 @@
                             <li class="user-avatar">
                                 <img src="#" alt="图片" class="img-circle">
                                 <div class="user-content">
-                                    <h5 class="no-m-bottom">{{ \Auth::guard('admin')->user()->username }}</h5>
+                                    <h5 class="no-m-bottom">test123</h5>
                                     <div class="m-top-xs">
                                         {{--<a href="#" class="m-right-sm" data-toggle="modal" data-target="#completeDetail">个人信息</a>--}}
                                         <a  href="{{ url('admin/logout') }}" class="C-P">退出</a>
@@ -108,7 +108,7 @@
                                  class="img-circle inline-block user-profile-pic">
 
                             <div class="user-detail inline-block">
-                                {{ \Auth::guard('admin')->user()->username }}
+                                test456
                                 <i class="fa fa-angle-down"></i>
                             </div>
                         </a>
@@ -176,7 +176,7 @@
                             </span>
                         </a>
                         <ul class="submenu bg-palette4">
-                            <li><a  href="{{ url('/admin/banner/list') }}"><span class="submenu-label">banner</span></a></li>
+                            <li><a href="{{ url('/admin/banner/list') }}"><span class="submenu-label">banner</span></a></li>
                             <li><a href="{{ url('/admin/context/list') }}"><span class="submenu-label">大讲堂</span></a></li>
                             <li><a href="{{ url('/admin/activity/list') }}"><span class="submenu-label">活动</span></a></li>
                             <li><a href="{{ url('/admin/history/list') }}"><span class="submenu-label">历史介绍</span></a></li>
@@ -400,14 +400,7 @@
     new Vue({
         el: '#managers',
         data: {
-            managerInfo: {
-                id: '{{ \Auth::guard('admin')->user()->id }}',
-                name: '{{ \Auth::guard('admin')->user()->username }}',
-                email: '{{ \Auth::guard('admin')->user()->email }}',
-                phone: '{{ \Auth::guard('admin')->user()->phone }}',
-                role: '',
-                is_first: '{{ \Auth::guard('admin')->user()->is_first }}',
-            },
+            managerInfo: {},
             pwdInfo: {
                 oldPwd: '',
                 pwd: '',
@@ -625,26 +618,6 @@
         data: {
             total: 0,
             news: []
-        },
-        mounted: function () {
-            var url = "{{ url('api/v1/admin/notify') }}";
-            var _this = this;
-            $.ajax({
-                url:url,
-                dataType:'json',
-                headers:{
-                    'X-CSRF-TOKEN':$("meta[name=csrf-token]").attr('content'),
-                },
-                timeout:60000,
-                data: {},
-                type:'GET'
-            }).done(function (data) {
-                _this.total = data.total;
-                _this.news = data.data;
-            }).fail(function (data) {
-                alert("网络错误！");
-                return false;
-            });
         },
         methods: {
             logout: function () {

@@ -2,24 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-	use Notifiable;
-	use SoftDeletes;
+    use Notifiable;
 
-    protected $fillable = ['name', 'phone', 'email', 'address', 'area_code', 'is_forbidden'];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
 
-	public function cards()
-	{
-		return $this->hasMany('App\Models\Card', 'user_id', 'id');
-	}
-
-    public function recommendation()
-    {
-        return $this->hasOne('App\Models\Recommend', 'user_id');
-	}
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
 }

@@ -6,47 +6,44 @@
 
 namespace App\Services;
 
-use App\Exceptions\SmsException;
-use App\Models\SmsRecord;
-use App\Models\User;
+use App\Repositories\SmsCaptchaRepository;
+use App\Repositories\SmsLogRepository;
 use Caikeal\LaravelSms\sms\Facades\Sms;
 
 class SmsService
 {
-	private $config = [
-		'register' => [
-			'template_id' => 1,
-			'type_id' => 1,
-			'expiration' => 3,    //有效数据,单位 分钟s
-		],
-		'login' => [
-			'template_id' => 1,
-			'type_id' => 2,
-			'expiration' => 3,    //有效数据,单位 分钟s
-		],
-		'password' => [
-			'template_id' => 1,
-			'type_id' => 3,
-			'expiration' => 3,    //有效数据,单位 分钟s
-		],
-		'updatePhone' => [
-			'template_id' => 1,
-			'type_id' => 4,
-			'expiration' => 3,    //有效数据,单位 分钟s
-		],
-        'bindPhone' => [
-            'template_id' => 1,
-            'type_id' => 5,
-            'expiration' => 3,    //有效数据,单位 分钟s
-        ],
-        'validateCard' => [
-            'template_id' => 1,
-            'type_id' => 6,
-            'expiration' => 3,    //有效数据,单位 分钟s
-        ]
-	];
+	const TYPE_VERIFY_PHONE = 1;
 
-	/**
+	public $config = [
+	  self::TYPE_VERIFY_PHONE => [
+	      'template_id' => 1, //模板
+          'expiration' => 1, //分钟
+      ],
+    ];
+
+    /**
+     * @var SmsCaptchaRepository
+     */
+	public $smsCaptchaRepository;
+
+    /**
+     * @var SmsLogRepository
+     */
+	public $smsLogRepository;
+
+
+
+	public function __construct(
+	    SmsCaptchaRepository $smsCaptchaRepository,
+        SmsLogRepository $smsLogRepository
+
+    )
+    {
+        $this->smsCaptchaRepository = $smsCaptchaRepository;
+        $this->smsLogRepository = $smsLogRepository;
+    }
+
+    /**
 	 * 随机生成6位验证码
 	 *
 	 * @return string
@@ -60,16 +57,7 @@ class SmsService
 		return $code;
 	}
 
-	/**
-	 * 检查电话号码是否已经注册
-	 *
-	 * @param $phone
-	 * @return mixed
-	 */
-	public function checkRegister($phone)
-	{
-		return User::where('phone', $phone)->first();
-	}
+
 
 	/**
 	 * 检查验证码是否有效 若有效则清除已使用的验证码
@@ -78,19 +66,18 @@ class SmsService
 	 * @param $code
 	 * @param $type
 	 * @return bool
-	 * @throws SmsException
 	 */
 	public function check($phone, $code, $type)
 	{
-		$record = SmsRecord::where(['phone' => $phone, 'code' => $code, 'type' => $this->config[$type]['type_id']])->first();
+	    $record = $this->smsCaptchaRepository->model->where(['phone' => $phone, 'code' => $code, 'type' => $type])->first();
 
 		if ($record && $record->expiration >= time()) {
-			SmsRecord::destroy($record->id);    //删除已使用的验证码
+			$this->smsCaptchaRepository->destory($record->id);  //删除已使用的验证码
 			return true;
 		} elseif (! $record) {
-			throw new SmsException('无效的验证码', 400102);
+		    return false;
 		} elseif ($record->expiration < time()) {
-			throw new SmsException('验证码已过期', 400101);
+			return false;
 		}
 	}
 
@@ -99,16 +86,16 @@ class SmsService
 	 *
 	 * @param $phone
 	 * @param $type
-	 * @throws SmsException
+     * @return  bool
 	 */
 	private function justSent($phone, $type)
 	{
 		$tplTime = date("Y-m-d H:i:s", time() - 100);
-		$record = SmsRecord::where(['phone' => $phone, 'type' => $this->config[$type]['type_id']])
+		$record = $this->smsCaptchaRepository->model->where(['phone' => $phone, 'type' => $type])
 				->where('created_at', '>=', $tplTime)
 				->first();
 		if ($record) {
-			throw new SmsException('验证码已发送', 400103);
+			return true;
 		}
 	}
 
@@ -121,10 +108,9 @@ class SmsService
 	 */
 	private function stillValid($phone, $type)
 	{
-		$record = SmsRecord::where(['phone' => $phone, 'type' => $this->config[$type]['type_id']])->first();
-		if ($record
-			&& time() <= $record->expiration) {
-			return $record;
+		$record = $this->smsCaptchaRepository->model->where(['phone' => $phone, 'type' => $type])->first();
+		if ($record && time() <= $record->expiration) {
+			return $record->code;
 		} else {
 			return false;
 		}
@@ -132,39 +118,36 @@ class SmsService
 
 	/**
 	 * 发送验证码
-	 *
 	 * @param $phone
 	 * @param $type
-	 * @return bool
-	 * @throws SmsException
+	 * @return array
 	 */
 	public function send($phone, $type)
 	{
-		$this->justSent($phone, $type);
-		if ($record = $this->stillValid($phone, $type)) {
-			$code = $record->code;
-		} else {
-			$code = $this->generateCode();
-		}
+	    if($this->justSent($phone,$type)){
+	        return ['error'=>1,'message'=>'验证码已发送'];
+        }
+        $code = $this->stillValid($phone,$type);
+        $new_code = $code ? $code:$this->generateCode();
 		$response = Sms::to($phone)
 			->template('YunTongXun', $this->config[$type]['template_id'])
-			->data([$code, $this->config[$type]['expiration']])
+			->data([$new_code, $this->config[$type]['expiration']])
 			->send();
 
 		if ($response->statusCode == '000000' && ! $this->stillValid($phone, $type)) {
 			$record = [
 				'phone' => $phone,
-				'code'  => $code,
-				'type'  => $this->config[$type]['type_id'],
+				'code'  => $new_code,
+				'type'  => $type,
 				'expiration' => time() + $this->config[$type]['expiration'] * 60,
 			];
-			if (SmsRecord::create($record)) {
-				return true;
+			if ($this->smsCaptchaRepository->create($record)) {
+				return ['error'=>0,'message'=>'发送成功'];
 			} else {
-				throw new SmsException('验证码保存失败', 400105);
+				return ['error'=>1,'message'=>'验证码保存失败'];
 			}
 		} else {
-			throw new SmsException($response->statusMsg, 400106);
+			return ['error'=>1,'message'=>'发送失败','response_code'=>$response->statusCode];
 		}
 	}
 }

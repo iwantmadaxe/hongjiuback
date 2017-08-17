@@ -2,14 +2,14 @@
 
 namespace App\Exceptions;
 
-use Caikeal\Output\Exceptions\HandlerTrait;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
 {
-	use HandlerTrait;
     /**
      * A list of the exception types that should not be reported.
      *
@@ -39,17 +39,49 @@ class Handler extends ExceptionHandler
 
     /**
      * Render an exception into an HTTP response.
-     *
+     * 定义json类型的exception返回
      * @param  \Illuminate\Http\Request  $request
      * @param  \Exception  $exception
      * @return \Illuminate\Http\Response
      */
     public function render($request, Exception $exception)
     {
-		if ($request->expectsJson()) {
-			return $this->handlerApi($exception);
-		}
+        //验证类的Exception
+        if($exception instanceof ValidationException){
+            return $exception->getResponse();
+        }
+        //预处理Exception
+        $exception =  $this->prepareException($exception);
+        if($request->expectsJson()){
+            if($exception instanceof UnauthorizedHttpException){
+                return response()->json([
+                    'code'=>$exception->getCode(),
+                    'status_code'=>$exception->getStatusCode(),
+                    'message'=>$exception->getMessage()
+                ],$exception->getStatusCode());
+            }else{
+                return response()->json([
+                    'code' => $exception->getCode().'000',
+                    'status_code' => $exception->getCode(),
+                    'message'=>$exception->getMessage(),
+                ],$exception->getCode());
+            }
+        }
         return parent::render($request, $exception);
+    }
+
+    /**
+     * 自定义处理部分exception
+     * @param Exception $e
+     * @return Exception
+     */
+    protected function prepareException(Exception $e)
+    {
+        //身份验证失败
+        if($e instanceof UnauthorizedHttpException){
+            return new UnauthorizedHttpException('jwt-auths','身份验证失败，请重新登录',null,401000);
+        }
+        return parent::prepareException($e);
     }
 
     /**

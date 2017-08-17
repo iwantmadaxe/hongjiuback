@@ -1,33 +1,31 @@
 <?php
-
 namespace App\Models;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Tymon\JWTAuth\Contracts\JWTSubject as AuthenticatableUserContract;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Zizaco\Entrust\Traits\EntrustUserTrait;
-
-class Admin extends Authenticatable
+class Admin extends Model implements AuthenticatableContract, AuthorizableContract,  AuthenticatableUserContract
 {
-	use Notifiable;
-	use SoftDeletes { restore as private restoreB; }
-    use EntrustUserTrait { restore as private restoreA; }
+    use Authenticatable, Authorizable, CanResetPassword;
 
-    protected $fillable = ['username', 'password', 'status', 'name', 'phone', 'email', 'address', 'openid', 'card_id', 'area_code'];
+    protected $table = 'admins';
+    protected $fillable = ['name', 'email', 'password','level'];
+    protected $hidden = ['password', 'remember_token'];
 
-	public function agent()
-	{
-		return $this->hasOne('App\Models\AgentInfo', 'user_id', 'id');
-	}
-
-    public function restore()
+    public function getJWTIdentifier()
     {
-        $this->restoreA();
-        $this->restoreB();
+        return $this->getKey(); // Eloquent model method
     }
 
-    public function isAdmin()
+    /**
+     * @return array
+     */
+    public function getJWTCustomClaims()
     {
-        return str_contains($this->roles()->first()->name, 'manager');
+        return [];
     }
 }
